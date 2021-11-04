@@ -31,5 +31,5 @@ macro(package_add_test TESTNAME)
 	target_compile_features(${TESTNAME} PUBLIC cxx_std_17)
 endmacro()
 
-file(GLOB_RECURSE UNIT_TESTS *.cpp)
+file(GLOB_RECURSE UNIT_TESTS "${Deamer_Algorithm_SOURCE_DIR}/tests/*.cpp")
 package_add_test(deamer_Algorithm_unit_tests ${UNIT_TESTS})
