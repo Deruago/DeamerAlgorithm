@@ -33,6 +33,11 @@ namespace deamer::algorithm::tree
 			template<typename T, typename ParentFunction_>
 			static std::vector<T*> RequiredCalls(T* t, ParentFunction_ GetParentFunction)
 			{
+				if (t == nullptr)
+				{
+					return {};
+				}
+				
 				std::vector<T*> ts;
 				while (t != nullptr)
 				{
@@ -46,6 +51,11 @@ namespace deamer::algorithm::tree
 			template<typename T, typename ParentFunction_, typename Conditional_>
 			static std::vector<T*> RequiredCalls(T* t, ParentFunction_ GetParentFunction, Conditional_ ConditionalRecurseFunction)
 			{
+				if (t == nullptr)
+				{
+					return {};	
+				}
+				
 				std::vector<T*> ts;
 				while (std::invoke(ConditionalRecurseFunction, t))
 				{
@@ -68,6 +78,11 @@ namespace deamer::algorithm::tree
 				template<typename T, typename ParentFunction_, typename Action>
 				static void Construction(T* t, ParentFunction_ GetParentFunction, Action action)
 				{
+					if (t == nullptr)
+					{
+						return {};
+					}
+					
 					auto requiredCalls = Inplace::Heap::RequiredCalls(t, GetParentFunction);
 					for (auto call : requiredCalls)
 					{

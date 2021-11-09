@@ -88,6 +88,163 @@ TEST_F(TestBFS, Search_CorrectlyCallInAndOutFunctions)
 	TEST_ACTIONS_ARE_CORRECT(tree.get(), actions);
 }
 
+TEST_F(TestBFS, Search_EmptyTree_DoesNothing)
+{
+	const auto actions = deamer::algorithm::tree::BFS::Search((Node*)nullptr, &Node::GetSubNodes);
+
+	EXPECT_EQ(0, actions.size());
+}
+
+TEST_F(TestBFS, Search_TreeWithSingleNode_CorrectlyCallInAndOutFunctions)
+{
+	auto treeSingleNode = std::make_unique<Node>(Data(1));
+	const auto actions = deamer::algorithm::tree::BFS::Search(treeSingleNode.get(), &Node::GetSubNodes);
+
+	ASSERT_EQ(2, actions.size());
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[0]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[1]);
+	}
+}
+
+TEST_F(TestBFS, Search_TreeWithSingleChild_CorrectlyCallInAndOutFunctions)
+{
+	auto treeSingleNode = std::make_unique<Node>(Data(1));
+	auto treeSingleChild = std::make_unique<Node>(Data(11), treeSingleNode.get());
+	treeSingleNode->AddSubNode(std::move(treeSingleChild));
+	
+	const auto actions =
+		deamer::algorithm::tree::BFS::Search(treeSingleNode.get(), &Node::GetSubNodes);
+
+	ASSERT_EQ(4, actions.size());
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[0]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[0], deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[1]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[0], deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[2]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[3]);
+	}
+}
+
+TEST_F(TestBFS, Search_TreeWithDoubleChild_CorrectlyCallInAndOutFunctions)
+{
+	auto treeSingleNode = std::make_unique<Node>(Data(1));
+	auto treeSingleChild = std::make_unique<Node>(Data(11), treeSingleNode.get());
+	auto treeDoubleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	treeSingleNode->AddSubNode(std::move(treeSingleChild));
+	treeSingleNode->AddSubNode(std::move(treeDoubleChild));
+
+	const auto actions =
+		deamer::algorithm::tree::BFS::Search(treeSingleNode.get(), &Node::GetSubNodes);
+
+	ASSERT_EQ(6, actions.size());
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[0]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[0], deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[1]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[1], deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[2]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[1], deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[3]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[0], deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[4]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[5]);
+	}
+}
+
+TEST_F(TestBFS, Search_TreeWithTripleChild_CorrectlyCallInAndOutFunctions)
+{
+	auto treeSingleNode = std::make_unique<Node>(Data(1));
+	auto treeSingleChild = std::make_unique<Node>(Data(11), treeSingleNode.get());
+	auto treeDoubleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	auto treeTripleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	treeSingleNode->AddSubNode(std::move(treeSingleChild));
+	treeSingleNode->AddSubNode(std::move(treeDoubleChild));
+	treeSingleNode->AddSubNode(std::move(treeTripleChild));
+
+	const auto actions =
+		deamer::algorithm::tree::BFS::Search(treeSingleNode.get(), &Node::GetSubNodes);
+
+	ASSERT_EQ(8, actions.size());
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[0]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[0], deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[1]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[1], deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[2]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[2], deamer::algorithm::tree::BFS::Action::Entry};
+		EXPECT_EQ(pair, actions[3]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[2], deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[4]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[1], deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[5]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode->GetSubNodes()[0], deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[6]);
+	}
+	{
+		auto pair = std::pair<Node*, deamer::algorithm::tree::BFS::Action>{
+			treeSingleNode.get(), deamer::algorithm::tree::BFS::Action::Exit};
+		EXPECT_EQ(pair, actions[7]);
+	}
+}
+
 static void TEST_ACTIONS_ARE_CORRECT(
 	Node* tree, const std::vector<std::pair<Node*, deamer::algorithm::tree::BFS::Action>>& actions)
 {

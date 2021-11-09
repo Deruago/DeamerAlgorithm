@@ -1,3 +1,4 @@
+set(INSTALL_GTEST off)
 add_subdirectory("${PROJECT_SOURCE_DIR}/extern/googletest" "extern/googletest")
 
 mark_as_advanced(

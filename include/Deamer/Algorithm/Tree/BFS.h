@@ -28,6 +28,11 @@ namespace deamer::algorithm::tree
 		static std::vector<std::pair<T*, Action>> Search(T* init,
 														 ExtensionFunction_ ExtensionFunction)
 		{
+			if (init == nullptr)
+			{
+				return {};
+			}
+
 			auto t = init;
 			std::size_t index = 0;
 			std::vector<std::pair<T*, Action>> actions;
@@ -78,6 +83,11 @@ namespace deamer::algorithm::tree
 			static void Search(T* init, ExtensionFunction_ ExtensionFunction,
 							   EntryAction_ EntryAction, ExitAction_ ExitAction)
 			{
+				if (init == nullptr)
+				{
+					return;
+				}
+
 				const auto actions = BFS::Search(init, ExtensionFunction);
 				for (auto [object, action] : actions)
 				{
