@@ -44,12 +44,14 @@ namespace deamer::algorithm::tree
 			// This is slower than variant using the Parent function.
 			// This is due to required lookup whether a node has been visited already.
 			template<typename T, typename ExtensionFunction_>
-			static auto Search(T* init, ExtensionFunction_ ExtensionFunction) -> std::vector<
-				std::pair<std::conditional_t<
-							  std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-								  ExtensionFunction, init))::value_type>>,
-							  const T*, T*>,
-						  Action>>
+			static auto Search(T* init, ExtensionFunction_ ExtensionFunction)
+				-> std::vector<std::pair<
+					std::conditional_t<
+						std::is_const_v<T> ||
+							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+								ExtensionFunction, init))::value_type>>,
+						const T*, T*>,
+					Action>>
 			{
 				if (init == nullptr)
 				{
@@ -57,25 +59,29 @@ namespace deamer::algorithm::tree
 				}
 
 				std::conditional_t<
-					std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-						ExtensionFunction, init))::value_type>>,
+					std::is_const_v<T> ||
+						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+							ExtensionFunction, init))::value_type>>,
 					const T*, T*>
 					t = init;
 				std::stack<std::conditional_t<
-					std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-						ExtensionFunction, init))::value_type>>,
+					std::is_const_v<T> ||
+						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+							ExtensionFunction, init))::value_type>>,
 					const T*, T*>>
 					ts;
 				std::vector<std::pair<
 					std::conditional_t<
-						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-							ExtensionFunction, init))::value_type>>,
+						std::is_const_v<T> ||
+							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+								ExtensionFunction, init))::value_type>>,
 						const T*, T*>,
 					Action>>
 					actions;
 				std::set<std::conditional_t<
-					std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-						ExtensionFunction, init))::value_type>>,
+					std::is_const_v<T> ||
+						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+							ExtensionFunction, init))::value_type>>,
 					const T*, T*>>
 					visited;
 
@@ -114,16 +120,18 @@ namespace deamer::algorithm::tree
 							   ExtensionFunction_ ExtensionFunction)
 				-> std::vector<std::pair<
 					std::conditional_t<
-						std::is_const_v<std::remove_pointer_t<
-							decltype(std::invoke(GetParentFunction, init))>> ||
+						std::is_const_v<T> ||
+							std::is_const_v<std::remove_pointer_t<
+								decltype(std::invoke(GetParentFunction, init))>> ||
 							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
 								ExtensionFunction, init))::value_type>>,
 						const T*, T*>,
 					Action>>
 			{
 				using store_T = std::conditional_t<
-					std::is_const_v<
-						std::remove_pointer_t<decltype(std::invoke(GetParentFunction, init))>> ||
+					std::is_const_v<T> ||
+						std::is_const_v<std::remove_pointer_t<decltype(std::invoke(
+							GetParentFunction, init))>> ||
 						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
 							ExtensionFunction, init))::value_type>>,
 					const T*, T*>;
@@ -132,11 +140,19 @@ namespace deamer::algorithm::tree
 				{
 					return {};
 				}
-
+				std::conditional_t<std::is_const_v<T> ||
+									   std::is_const_v<std::remove_pointer_t<decltype(
+										   std::invoke(GetParentFunction, init))>> ||
+									   std::is_const_v<std::remove_pointer_t<typename decltype(
+										   std::invoke(ExtensionFunction, init))::value_type>>,
+								   const T*, T*>
+					parentPointer = std::invoke(GetParentFunction, init);
+				
 				bool complete = false;
 				std::conditional_t<
-					std::is_const_v<
-						std::remove_pointer_t<decltype(std::invoke(GetParentFunction, init))>> ||
+					std::is_const_v<T> ||
+						std::is_const_v<std::remove_pointer_t<decltype(std::invoke(
+							GetParentFunction, init))>> ||
 						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
 							ExtensionFunction, init))::value_type>>,
 					const T*, T*>
@@ -144,8 +160,9 @@ namespace deamer::algorithm::tree
 				std::stack<std::pair<std::size_t, std::size_t>> size;
 				std::vector<std::pair<
 					std::conditional_t<
-						std::is_const_v<std::remove_pointer_t<decltype(std::invoke(
-							GetParentFunction, init))>> ||
+						std::is_const_v<T> ||
+							std::is_const_v<std::remove_pointer_t<decltype(std::invoke(
+								GetParentFunction, init))>> ||
 							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
 								ExtensionFunction, init))::value_type>>,
 						const T*, T*>,
@@ -174,7 +191,7 @@ namespace deamer::algorithm::tree
 					{
 						const auto tOriginal = t;
 						t = std::invoke(GetParentFunction, t);
-						if (t == nullptr)
+						if (t == parentPointer) // Checks if the parent is the parent of the starting node.
 						{
 							complete = true;
 							break;
@@ -204,7 +221,9 @@ namespace deamer::algorithm::tree
 							actions.emplace_back(tOriginal, Action::Exit);
 						}
 
-						t = std::invoke(ExtensionFunction, t)[++size.top().second];
+						auto tmp1 = ++size.top().second;
+						auto tmp2 = std::invoke(ExtensionFunction, t);
+						t = tmp2[tmp1];
 						break;
 					}
 				}
@@ -226,24 +245,27 @@ namespace deamer::algorithm::tree
 			static auto Search(T* init, ExtensionFunction_ ExtensionFunction)
 			{
 				using store_T = std::conditional_t<
-					std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-						ExtensionFunction, init))::value_type>>,
+					std::is_const_v<T> ||
+						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+							ExtensionFunction, init))::value_type>>,
 					const T*, T*>;
 
 				if (init == nullptr)
 				{
 					return std::vector<std::pair<
 						std::conditional_t<
-							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-								ExtensionFunction, init))::value_type>>,
+							std::is_const_v<T> ||
+								std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+									ExtensionFunction, init))::value_type>>,
 							const T*, T*>,
 						Action>>{};
 				}
 
 				std::vector<std::pair<
 					std::conditional_t<
-						std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-							ExtensionFunction, init))::value_type>>,
+						std::is_const_v<T> ||
+							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+								ExtensionFunction, init))::value_type>>,
 						const T*, T*>,
 					Action>>
 					actions;
@@ -254,14 +276,15 @@ namespace deamer::algorithm::tree
 			}
 
 			template<typename T, typename ExtensionFunction_>
-			static void
-			SearchLogic(T* init, ExtensionFunction_ ExtensionFunction,
-						std::vector<std::pair<
-							std::conditional_t<
-								std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
-									ExtensionFunction, init))::value_type>>,
-								const T*, T*>,
-							Action>>& actions)
+			static void SearchLogic(
+				T* init, ExtensionFunction_ ExtensionFunction,
+				std::vector<std::pair<
+					std::conditional_t<
+						std::is_const_v<T> ||
+							std::is_const_v<std::remove_pointer_t<typename decltype(std::invoke(
+								ExtensionFunction, init))::value_type>>,
+						const T*, T*>,
+					Action>>& actions)
 			{
 				if (init == nullptr)
 				{

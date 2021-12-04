@@ -318,6 +318,124 @@ TEST_F(TestDFS, HeapParentSearch_TreeTripleChild_CorrectlyCallInAndOutFunctions)
 	}
 }
 
+TEST_F(TestDFS, HeapParentSearch_UnusedRoot_TreeTripleChild_CorrectlyCallInAndOutFunctions)
+{
+	auto treeUnusedRoot = std::make_unique<Node>(Data(0));
+	auto treeSingleNode = std::make_unique<Node>(Data(1), treeUnusedRoot.get());
+	auto treeSingleChild = std::make_unique<Node>(Data(11), treeSingleNode.get());
+	auto treeDoubleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	auto treeTripleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	auto treeSingleNodePtr = treeSingleNode.get();
+	treeSingleNode->AddSubNode(std::move(treeSingleChild));
+	treeSingleNode->AddSubNode(std::move(treeDoubleChild));
+	treeSingleNode->AddSubNode(std::move(treeTripleChild));
+	treeUnusedRoot->AddSubNode(std::move(treeSingleNode));
+
+	const auto actions =
+		deamer::algorithm::tree::DFS::Heap::Search(treeSingleNodePtr, &Node::GetSubNodes);
+
+	ASSERT_EQ(8, actions.size());
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr, deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[0]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[0], deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[1]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[0], deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[2]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[1], deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[3]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[1], deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[4]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[2], deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[5]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[2], deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[6]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr, deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[7]);
+	}
+}
+
+TEST_F(TestDFS, HeapParentSearch_WithParent_UnusedRoot_TreeTripleChild_CorrectlyCallInAndOutFunctions)
+{
+	auto treeUnusedRoot = std::make_unique<Node>(Data(0));
+	auto treeSingleNode = std::make_unique<Node>(Data(1), treeUnusedRoot.get());
+	auto treeSingleChild = std::make_unique<Node>(Data(11), treeSingleNode.get());
+	auto treeDoubleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	auto treeTripleChild = std::make_unique<Node>(Data(12), treeSingleNode.get());
+	auto treeSingleNodePtr = treeSingleNode.get();
+	treeSingleNode->AddSubNode(std::move(treeSingleChild));
+	treeSingleNode->AddSubNode(std::move(treeDoubleChild));
+	treeSingleNode->AddSubNode(std::move(treeTripleChild));
+	treeUnusedRoot->AddSubNode(std::move(treeSingleNode));
+
+	const auto actions =
+		deamer::algorithm::tree::DFS::Heap::Search(treeSingleNodePtr, &Node::GetParent, &Node::GetSubNodes);
+
+	ASSERT_EQ(8, actions.size());
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr, deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[0]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[0], deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[1]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[0], deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[2]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[1], deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[3]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[1], deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[4]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[2], deamer::algorithm::tree::DFS::Action::Entry};
+		EXPECT_EQ(pair, actions[5]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr->GetSubNodes()[2], deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[6]);
+	}
+	{
+		auto pair = std::pair<const Node*, deamer::algorithm::tree::DFS::Action>{
+			treeSingleNodePtr, deamer::algorithm::tree::DFS::Action::Exit};
+		EXPECT_EQ(pair, actions[7]);
+	}
+}
+
 static void TEST_ACTIONS_ARE_CORRECT(
 	const Node* tree,
 	const std::vector<std::pair<const Node*, deamer::algorithm::tree::DFS::Action>>& actions)
