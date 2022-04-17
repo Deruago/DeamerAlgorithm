@@ -27,8 +27,6 @@ macro(package_add_test TESTNAME)
     )
     set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
 	
-	add_dependencies(build_and_test ${TESTNAME})
-	
 	target_compile_features(${TESTNAME} PUBLIC cxx_std_17)
 endmacro()
 
