@@ -7,6 +7,7 @@
 #include <stack>
 #include <iostream>
 #include <functional>
+#include <type_traits>
 
 namespace deamer::algorithm::tree
 {
